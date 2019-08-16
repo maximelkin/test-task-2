@@ -1,0 +1,3 @@
+--file ./lib/hooks
+--timeout 10000
+--recursive ./suites

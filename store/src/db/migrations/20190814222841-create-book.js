@@ -8,9 +8,10 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      author_id: {
+      authorId: {
         type: Sequelize.INTEGER,
         allowNull: false,
+        field: 'author_id',
       },
       title: {
         type: Sequelize.STRING,
@@ -22,7 +23,7 @@ module.exports = {
       },
     })
   },
-  down: (queryInterface, Sequelize) => {
+  down: (queryInterface) => {
     return queryInterface.dropTable('Books')
   },
 }

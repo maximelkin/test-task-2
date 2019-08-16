@@ -1,46 +1,82 @@
 'use strict'
 
-const db = require('./db')
+const { Book, Author, sequelize, Sequelize } = require('./db')
 const Umzug = require('umzug')
+const path = require('path')
 
-const { Op } = db.Sequelize
+const { Op } = Sequelize
 
 async function createBook (book) {
-  return db.book.create(book)
+  try {
+    const result = await Book.create(book)
+    return {
+      status: 'success',
+      body: result,
+    }
+  } catch (e) {
+    if (e instanceof Sequelize.ForeignKeyConstraintError) {
+      return {
+        status: 'error',
+        error: 'errors.books.no-author',
+      }
+    }
+    throw e
+  }
 }
 
 async function createAuthor (author) {
-  return db.author.create(author)
+  return Author.create(author)
 }
 
-async function selectTop (limit) {
-  return db.author.findAll({
-    attributes: {
-    },
+async function calculateTop (limit, minBookPages) {
+  return Author.findAll({
     include: [{
-      model: db.book,
+      model: Book,
+      attributes: [],
       where: {
         pages: {
-          [Op.gt]: 200,
+          [Op.gt]: minBookPages,
         },
       },
     }],
-    order: db.sequelize.literal('count(*) DESC'),
-    group: ['book.id'],
+    order: sequelize.literal('count(*) DESC'),
+    group: ['Author.id'],
     limit,
   })
 }
 
-async function connect () {
-  await db.sequelize.authenticate() // check all ok
-  const umzug = new Umzug({ sequelize: db.sequelize })
+async function cleanStore () {
+  await Book.destroy({ truncate: true })
+  await Author.destroy({ truncate: true, cascade: true })
+}
 
-  await umzug.up() // migrations
+async function runMigrations (sequelize) {
+  const umzug = new Umzug({
+    storage: 'sequelize',
+    storageOptions: {
+      sequelize,
+    },
+    migrations: {
+      path: path.join(__dirname, 'db', 'migrations'),
+      params: [
+        sequelize.getQueryInterface(),
+        sequelize.constructor,
+      ],
+    },
+  })
+
+  await umzug.up()
+}
+
+async function connect () {
+  await sequelize.authenticate() // check all ok
+  await runMigrations(sequelize)
 
   return {
     createBook,
     createAuthor,
-    selectTop,
+    calculateTop,
+    cleanStore,
   }
 }
 

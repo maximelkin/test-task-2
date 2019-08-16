@@ -1,7 +1,7 @@
 'use strict'
 
 module.exports = (sequelize, DataTypes) => {
-  const Author = sequelize.define('Author', {
+  return sequelize.define('Author', {
     name: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -11,5 +11,4 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
     },
   }, { timestamps: false })
-  return Author
 }

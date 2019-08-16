@@ -2,9 +2,10 @@
 
 module.exports = (sequelize, DataTypes) => {
   const Book = sequelize.define('Book', {
-    author_id: {
+    authorId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      field: 'author_id',
     },
     title: {
       type: DataTypes.STRING,
@@ -15,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
     },
   }, { timestamps: false })
+
   Book.associate = function (models) {
     models.Author.hasMany(Book, { foreignKey: 'author_id', sourceKey: 'id' })
   }

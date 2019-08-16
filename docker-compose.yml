@@ -1,0 +1,67 @@
+version: "3"
+
+services:
+  rabbit:
+    build:
+      context: ./rabbit
+    volumes:
+      - "./volumes/rabbit:/var/lib/rabbitmq"
+
+  redis:
+    image: redis:5-alpine
+
+  postgres:
+    image: postgres:11-alpine
+    environment:
+      POSTGRES_DB: store
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - "./volumes/postgres:/var/lib/postgresql/data"
+
+  api:
+    build:
+      context: ./api
+    ports:
+      - "80:80"
+    environment:
+      PORT: 80
+      RABBIT_HOST: amqp://rabbit:5672
+      REDIS_HOST: redis://redis:6379
+    env_file:
+      - .env
+    depends_on:
+      - store
+      - aggregator
+      - rabbit
+      - redis
+
+  store:
+    build:
+      context: ./store
+    environment:
+      RABBIT_HOST: amqp://rabbit:5672
+      POSTGRES_HOST: postgres://postgres:postgres@postgres:5432/store
+    ports:
+      - "9229:9229"
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - rabbit
+
+  aggregator:
+    build:
+      context: ./aggregator
+    environment:
+      RABBIT_HOST: amqp://rabbit:5672
+      REDIS_HOST: redis://redis:6379
+      AUTHORS_LIMIT: 5
+      MIN_BOOK_PAGES: 200
+      RECALCULATE_INTERVAL: 1000
+    env_file:
+      - .env
+    depends_on:
+      - store
+      - rabbit
+      - redis

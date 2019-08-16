@@ -1,24 +1,16 @@
 'use strict'
 
-const dbModule = require('./db')
-const rabbitModule = require('./rabbit')
-const config = require('./config')
+const { connect: dbConnect } = require('./database')
+const { connect: rabbitConnect } = require('./rabbit')
+const { controllers } = require('./controllers')
+const logger = require('./logger')
 
 async function main () {
-  const db = await dbModule.connect()
-  const rabbit = await rabbitModule.connect()
+  const db = await dbConnect()
+  const rabbit = await rabbitConnect()
 
-  rabbit.subscribe(config.queues.createBook, book => {
-    return db.createBook(book) // todo validation is author exists
-  })
-
-  rabbit.subscribe(config.queues.createAuthor, author => {
-    return db.createAuthor(author)
-  })
-
-  rabbit.subscribe(config.queues.calculateTop, limit => {
-    return db.calculateTop(limit)
-  })
+  await controllers({ db, queueManager: rabbit })
+  logger.info('setup is done')
 }
 
 main()

@@ -8,13 +8,13 @@ const db = {}
 
 const sequelize = new Sequelize(config.url, config)
 
+const modelsDir = path.join(__dirname, 'models')
+
 fs
-  .readdirSync(__dirname)
-  .filter(file => {
-    return (file.indexOf('.') !== 0) && (file.slice(-3) === '.js')
-  })
+  .readdirSync(modelsDir)
+  .filter(file => !file.startsWith('.') && file.endsWith('.js'))
   .forEach(file => {
-    const model = sequelize['import'](path.join(__dirname, file))
+    const model = sequelize['import'](path.join(modelsDir, file))
     db[model.name] = model
   })
 
