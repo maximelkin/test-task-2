@@ -1,0 +1,22 @@
+{
+  "name": "@test-task/store",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "lint": "eslint src/",
+    "lint-fix": "eslint --fix src/"
+  },
+  "dependencies": {
+    "@test-task/logger": "^1.0.0",
+    "@test-task/rabbit-rpc": "^1.0.0",
+    "amqplib": "^0.5.5",
+    "pg": "^7.12.1",
+    "pg-hstore": "^2.3.3",
+    "sequelize": "^5.15.0",
+    "umzug": "^2.2.0"
+  },
+  "author": "",
+  "license": "ISC"
+}

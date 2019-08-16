@@ -2,8 +2,7 @@ version: "3"
 
 services:
   rabbit:
-    build:
-      context: ./rabbit
+    image: rabbitmq:3-alpine
     volumes:
       - "./volumes/rabbit:/var/lib/rabbitmq"
 
@@ -19,9 +18,16 @@ services:
     volumes:
       - "./volumes/postgres:/var/lib/postgresql/data"
 
-  api:
+  origin:
+    image: origin
     build:
-      context: ./api
+      context: .
+      dockerfile: Dockerfile
+
+  api:
+    image: origin
+    command: ["bash", "wait-for-it.sh", "-t", "0", "rabbit:5672", "--", "npm", "start", "--prefix", "packages/api"]
+    restart: always
     ports:
       - "80:80"
     environment:
@@ -37,8 +43,9 @@ services:
       - redis
 
   store:
-    build:
-      context: ./store
+    image: origin
+    command: ["bash", "wait-for-it.sh", "-t", "0", "rabbit:5672", "--", "npm", "start", "--prefix", "packages/store"]
+    restart: always
     environment:
       RABBIT_HOST: amqp://rabbit:5672
       POSTGRES_HOST: postgres://postgres:postgres@postgres:5432/store
@@ -51,8 +58,9 @@ services:
       - rabbit
 
   aggregator:
-    build:
-      context: ./aggregator
+    image: origin
+    command: ["bash", "wait-for-it.sh", "-t", "0", "rabbit:5672", "--", "npm", "start", "--prefix", "packages/aggregator"]
+    restart: always
     environment:
       RABBIT_HOST: amqp://rabbit:5672
       REDIS_HOST: redis://redis:6379
@@ -62,3 +70,10 @@ services:
       - store
       - rabbit
       - redis
+  test:
+    image: origin
+    command: ["bash", "wait-for-it.sh", "-t", "0", "api:80", "--", "npm", "test", "--prefix", "packages/test"]
+    environment:
+      API_HOST: http://api:80/
+    depends_on:
+      - api

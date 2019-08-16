@@ -1,0 +1,12 @@
+{
+  "packages": [
+    "packages/logger",
+    "packages/rabbit-rpc",
+    "packages/redis",
+    "packages/aggregator",
+    "packages/api",
+    "packages/store",
+    "packages/test"
+  ],
+  "version": "0.0.0"
+}
