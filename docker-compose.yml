@@ -56,9 +56,6 @@ services:
     environment:
       RABBIT_HOST: amqp://rabbit:5672
       REDIS_HOST: redis://redis:6379
-      AUTHORS_LIMIT: 5
-      MIN_BOOK_PAGES: 200
-      RECALCULATE_INTERVAL: 1000
     env_file:
       - .env
     depends_on:
