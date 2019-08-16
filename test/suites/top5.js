@@ -39,8 +39,29 @@ describe('Books', () => {
       id: response.id,
     }])
   })
-  // TODO testcase invalid, ask for expected behaviour
-  it.skip('Does give ordered top5', async () => {
+
+  it('Does not return authors without books > 200', async () => {
+
+    const { id: authorId1 } = await request.post('/author', {
+      body: {
+        name: 'a',
+        age: 17,
+      },
+    })
+    await request.post('/book', {
+      body: {
+        title: 'First book',
+        pages: 131,
+        authorId: authorId1,
+      },
+    })
+    await delay(1200)
+    const top = await request.get('/top5')
+
+    assert.deepEqual(top, [])
+  })
+
+  it('Does give ordered top5', async () => {
 
     const { id: authorId1 } = await request.post('/author', {
       body: {
@@ -57,9 +78,23 @@ describe('Books', () => {
     })
     await request.post('/book', {
       body: {
-        title: 'A book',
+        title: 'First book',
+        pages: 231,
+        authorId: authorId1,
+      },
+    })
+    await request.post('/book', {
+      body: {
+        title: '2 book',
         pages: 232,
         authorId: authorId1,
+      },
+    })
+    await request.post('/book', {
+      body: {
+        title: '3 book',
+        pages: 232,
+        authorId: authorId2,
       },
     })
     await delay(1200)
